@@ -1,75 +1,50 @@
 // Add imports above this line
 import { galleryItems } from './gallery-items';
 // Change code below this line
-// Описаний в документації
+
 import SimpleLightbox from "simplelightbox";
-// Додатковий імпорт стилів
+
 import "simplelightbox/dist/simple-lightbox.min.css";
-const listEl = document.querySelector(".gallery");
-// const markup = galleryItems
-//   .map((galleryItem) => {
-//     const { preview, original, description } = galleryItem;
 
-//     return renderMarkup(preview, original, description);
-//   })
-//   .join("");
+const galleryRef = document.querySelector('.gallery');
+const makup = creatImgMakup(galleryItems);
+galleryRef.insertAdjacentHTML('beforeend', makup);
 
-const markup = galleryItems
-  .map(({ preview, original, description }) =>
-    renderMarkup(preview, original, description)
-  )
-  .join("");
+function creatImgMakup(items) {
+    return items.map(({ preview, original, description }) => {
+        return `<li class="gallery__item">
+            <a class="gallery__link" href="${original}">
+                <img
+                    class="gallery__image"
+                    src="${preview}"
+                    alt="${description}"
+                />
+            </a>
+        </li>`
+    }). join('');
+};
 
-listEl.insertAdjacentHTML("afterbegin", markup);
+galleryRef.addEventListener('click', onClick);
 
-listEl.addEventListener("click", (event) => {
-  event.preventDefault();
+galleryRef.style.listStyle = 'none';
 
-  if (event.target.nodeName !== "IMG") {
-    return;
-  }
+function onClick(event) {
+    event.preventDefault();
 
-  const path = event.target.dataset.source;
-
-  const instance = basicLightbox.create(
-    `
-    <img src="${path}">
- `,
-    {
-      onShow: registerKeypress,
+    if (event.target.tagName !== "IMG") {
+        return;
     }
-  );
 
-  instance.show();
-});
+     new SimpleLightbox('.gallery a',{
+        
+        captionPosition: 'bottom',
+        captionDelay: 250,
+        captionsData: 'alt',
+        
+    });
+    
+   
+    }
 
-function renderMarkup(preview, original, description) {
-  return `<li class="gallery__item">
-        <a
-          class="gallery__link"
-          href="${original}"
-        >
-          <img
-            class="gallery__image"
-            src="${preview}"
-            data-source="${original}"
-            alt="${description}"
-          />
-        </a>
-      </li>`;
-}
 
-function onEscapeHandler(event, instance) {
-  if (event.key !== "Escape") {
-    return;
-  }
-  instance.close();
-}
-
-function registerKeypress(instance) {
-  window.addEventListener(
-    "keydown",
-    (event) => onEscapeHandler(event, instance),
-    { once: true }
-  );
-}                                                                                                                                                                                  
+//console.log(galleryItems);

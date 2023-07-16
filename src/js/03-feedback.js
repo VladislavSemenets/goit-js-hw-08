@@ -1,51 +1,43 @@
-// Функція для збереження значень полів у локальне сховище
-function saveFormState() {
-  const formState = {
-    email: emailInput.value,
-    message: messageTextarea.value,
-  };
-  localStorage.setItem("feedback-form-state", JSON.stringify(formState));
+import throttle from "lodash.throttle";
+
+const formEl = document.querySelector('.feedback-form');
+const emailInput = formEl.elements.email;
+const messageInput = formEl.elements.message;
+const button = document.querySelector('button');
+
+const savedFeedback = JSON.parse(localStorage.getItem('feedback-form-state'));
+if (savedFeedback) {
+    emailInput.value = savedFeedback.email;
+    messageInput.value = savedFeedback.message;
+    button.disabled = !(emailInput.value && messageInput.value);
 }
 
-// Функція для заповнення полів форми зі значень у локальному сховищі
-function loadFormState() {
-  const formState = localStorage.getItem("feedback-form-state");
-  if (formState) {
-    const parsedFormState = JSON.parse(formState);
-    emailInput.value = parsedFormState.email;
-    messageTextarea.value = parsedFormState.message;
-  }
-}
 
-// Отримуємо посилання на форму
-const feedbackForm = document.getElementById("feedbackForm");
 
-// Перевіряємо, чи існує елемент форми
-if (feedbackForm) {
-  // Отримуємо посилання на поля форми
-  const emailInput = feedbackForm.querySelector("#emailInput");
-  const messageTextarea = feedbackForm.querySelector("#messageTextarea");
+formEl.addEventListener('input', throttle(() => {
+    localStorage.setItem('feedback-form-state', JSON.stringify({
+        email: emailInput.value,
+        message: messageInput.value
+    }));
 
-  // Викликаємо функцію для заповнення полів форми під час завантаження сторінки
-  loadFormState();
+    button.disabled = !(emailInput.value && messageInput.value);
+}, 500));
 
-  // Відстежуємо подію input на формі і зберігаємо значення полів у сховище з певною затримкою
-  const throttledSaveFormState = _.throttle(saveFormState, 500);
-  feedbackForm.addEventListener("input", throttledSaveFormState);
-
-  // Обробляємо подію submit форми
-  feedbackForm.addEventListener("submit", function (event) {
+formEl.addEventListener('submit', event => {
     event.preventDefault();
-    console.log("Submitted form with values:");
+    
     console.log({
-      email: emailInput.value,
-      message: messageTextarea.value,
+        email: emailInput.value,
+        message: messageInput.value
     });
+    
+    formEl.reset();
+    localStorage.removeItem('feedback-form-state');
+    button.disabled = true;
+});
 
-    // Очищуємо сховище
-    localStorage.removeItem("feedback-form-state");
-    // Очищуємо поля форми
-    emailInput.value = "";
-    messageTextarea.value = "";
-  });
-}
+
+    
+
+
+
